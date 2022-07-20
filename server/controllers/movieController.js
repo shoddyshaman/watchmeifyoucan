@@ -1,17 +1,25 @@
 require('dotenv').config()
 const axios = require('axios')
 const { API_KEY } = process.env
+const list = []
 module.exports = {
   searchMovie: (req, res) => {
     const { search } = req.query;
+    console.log(search)
     axios
       .get(
         `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=en-US&query=${search}&page=1&include_adult=false`
       )
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
         res.status(200).send(response.data)
       })
       .catch((err) => console.log(err));
   },
+  addMovie:(req,res) => {
+    const {movieObj} = req.body
+    list.push(movieObj)
+    console.log(list)
+    res.status(200).send('added to list')
+  }
 };
