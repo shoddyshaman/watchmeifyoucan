@@ -46,26 +46,38 @@ const handleSearch = (e) => {
 };
 
 const getTrending = () => {
-  axios.get(`${baseURL}/api/trending`).then().catch()
-}
+  axios.get(`${baseURL}/api/trending`).then().catch();
+};
 const getPopular = () => {
-  axios.get(`${baseURL}/api/popular`).then().catch()
-}
+  axios.get(`${baseURL}/api/popular`).then().catch();
+};
 
-const handleAuth = (authType) => {
-  const login = axios.post(`${baseURL}/api/login`,{
-    email:'',
-    password:''
-  }).then().catch()
-  const signUp = axios.post(`${baseURL}/api/signUp`).then().catch()
-  authType === 'login' ? login : signUp
-}
+const login = (body) =>
+  axios
+    .post(`${baseURL}/api/login`, body)
+    .then((res) => {
+      console.log("hit login");
+      sessionStorage.setItem("user", JSON.stringify(res.data));
+      window.location.reload();
+    })
+    .catch((err) => console.log(err));
 
+const signUp = (body) =>
+  axios
+    .post(`${baseURL}/api/signUp`, body)
+    .then((res) => {
+      sessionStorage.setItem("user", JSON.stringify(res.data));
+      window.location.reload();
+    })
+    .catch((err) => console.log(err));
 
+const handleAuth = (authType, body) => {
+  authType === "SignUp" ? signUp(body) : login(body);
+};
 
 searchForm.addEventListener("submit", handleSearch);
 
-//bootstrap modal for login/register
+//bootstrap modal for login/register starts
 var authModal = document.getElementById("signin");
 authModal.addEventListener("show.bs.modal", function (event) {
   // Button that triggered the modal
@@ -73,17 +85,27 @@ authModal.addEventListener("show.bs.modal", function (event) {
   // Extract info from data-bs-* attributes
   var recipient = button.getAttribute("data-bs-whatever");
   var modalTitle = authModal.querySelector(".modal-title");
-  var submitBtn = authModal.querySelector("#formSubmit");
+  // var submitBtn = authModal.querySelector("#formSubmit");
   var optionalMsg = document.querySelector("#optionalMsg");
-  var authSubmit = document.querySelector("#authSubmit")
+  var authSubmit = document.querySelector("#authSubmit");
+  const email = document.querySelector("#floatingInput");
+  const password = document.querySelector("#floatingPassword");
   // var modalBodyInput = exampleModal.querySelector('.modal-body input')
 
   modalTitle.textContent = button.textContent;
-  submitBtn.textContent = button.textContent;
-  console.log(modalTitle.textContent.trim())
-  modalTitle.textContent.trim() === "Login" ? optionalMsg.style.display = 'none' : optionalMsg.style.display = 'block';
-  authSubmit.textContent = button.textContent
-  authSubmit.textContent === 'Login' ? handleAuth('login') : handleAuth('signUp')
-  
+  // submitBtn.textContent = button.textContent;
+  // console.log(modalTitle.textContent.trim());
+  modalTitle.textContent.trim() === "Login"
+    ? (optionalMsg.style.display = "none")
+    : (optionalMsg.style.display = "block");
+  authSubmit.textContent = button.textContent;
+  authSubmit.addEventListener("click", (e) => {
+    e.preventDefault();
+    const body = { email: email.value, password: password.value };
+    console.log(authSubmit.textContent);
+    authSubmit.textContent.trim() === "Login"
+      ? handleAuth("Login", body)
+      : handleAuth("SignUp", body);
+  });
 });
 //end modal code for login/register

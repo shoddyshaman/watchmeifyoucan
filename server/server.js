@@ -8,6 +8,7 @@ app.use(cors())
 app.use(express.static('public'))
 const { searchMovie, addMovie } = require ('./controllers/movieController')
 const { userLogin, userSignup} = require('./controllers/authController')
+const { seed } = require('./controllers/db/seed.db.controller')
 
 //entry-point for app
 app.get('/',(req,res)=> {
@@ -19,8 +20,11 @@ app.get('/api/query',searchMovie)
 
 
 //auth endpoints
-app.get('/api/login',userLogin)
-app.get('/api/signUp',userSignup)
+app.post('/api/login',userLogin)
+app.post('/api/signUp',userSignup)
+
+//seed endpoint
+app.post('/api/seed',seed)
 
 app.post('/api/list',addMovie)
 

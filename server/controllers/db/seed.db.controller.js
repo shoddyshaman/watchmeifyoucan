@@ -17,7 +17,12 @@ module.exports = {
             drop table if exists watch_users;
             drop table if exists user_movies;
 
-            create table watch_users
-        `)
+            create table watch_users(
+                watch_user_id serial primary key,
+                email varchar not null,
+                passhash varchar(500) not null 
+            )
+        `).then(dbRes => res.sendStatus(200))
+        .catch(err => res.status(400).send(err))
     }
 }
