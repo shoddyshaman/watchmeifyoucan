@@ -2,15 +2,21 @@ console.log("connected");
 
 const searchForm = document.querySelector("#search-form");
 const searchInput = document.querySelector("#search-input");
-const displaySection = document.querySelector("#display-section");
-const baseURL = `http://localhost:4040`;
 
 const addToList = (movieObj) => {
   console.log(movieObj);
-  axios
-    .post(`${baseURL}/api/list`, { movieObj })
-    .then((res) => alert(res.data))
-    .catch((err) => console.log(err));
+  let token = sessionStorage.getItem("token");
+  let userId = sessionStorage.getItem("userId");
+  token == null
+    ? alert("Please login to add to list")
+    : axios
+        .post(`${baseURL}/api/list/${userId}`,movieObj, {
+          headers: {
+            authorization: token,
+          },
+        })
+        .then((res) => alert(res.data))
+        .catch((err) => console.log(err));
 };
 
 const handleSearch = (e) => {
@@ -22,52 +28,33 @@ const handleSearch = (e) => {
     .get(`${baseURL}/api/query/?search=${userInput}`)
     .then((res) => {
       // console.log(res.data);
-      res.data.results.map((result) => {
-        let displayDiv = document.createElement("div");
-        displayDiv.classList.add("card");
-        displayDiv.style.width = "18rem";
-        let resultObj = JSON.stringify({ ...result }).replace(
-          /[\/\(\)\']/g,
-          "&apos;"
-        );
-        // console.log(resultObj);
-        displayDiv.innerHTML = `
-          <img src='https://image.tmdb.org/t/p/w500/${result.poster_path}'/>
-          <div class="card-body bg-light">
-          <h5 class="card-title">${result.title}</h5>
-          <p class="card-text overflow-hidden">${result.overview}</p>
-          <a href="#" onclick='addToList(${resultObj})' class="btn btn-primary">Add to list</a>
-          </div>
-          `;
-        displaySection.appendChild(displayDiv);
-      });
+      createCard(res.data);
     })
     .catch((err) => console.log(err));
-};
-
-const getTrending = () => {
-  axios.get(`${baseURL}/api/trending`).then().catch();
-};
-const getPopular = () => {
-  axios.get(`${baseURL}/api/popular`).then().catch();
 };
 
 const login = (body) =>
   axios
     .post(`${baseURL}/api/login`, body)
     .then((res) => {
-      console.log("hit login");
-      sessionStorage.setItem("user", JSON.stringify(res.data));
-      window.location.reload();
+      console.log(res.data);
+      let token = res.data.token;
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("userId", res.data.watch_user_id);
+      window.location.href = `/`;
     })
     .catch((err) => console.log(err));
 
 const signUp = (body) =>
   axios
     .post(`${baseURL}/api/signUp`, body)
-    .then((res) => {
-      sessionStorage.setItem("user", JSON.stringify(res.data));
-      window.location.reload();
+    .then(async (res) => {
+      // console.log("hit signup");
+      let token = await res.data.token;
+      console.log(res.data);
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("userId", res.data.watch_user_id);
+      window.location.href = `/`;
     })
     .catch((err) => console.log(err));
 
@@ -109,3 +96,15 @@ authModal.addEventListener("show.bs.modal", function (event) {
   });
 });
 //end modal code for login/register
+
+//get top rated movies
+const getTopRated = () => {
+  axios
+    .get(`${baseURL}/api/topRated`)
+    .then((res) => {
+      createCard(res.data);
+    })
+    .catch((err) => console.log(err));
+};
+
+getTopRated();
